@@ -6,9 +6,8 @@ from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from .forms import *
 import webbrowser
+from django.http import HttpResponse
 
-
-# Create your views here.
 
 def create_qrcode(data):
     timestamp = round(datetime.now().timestamp())
@@ -54,6 +53,50 @@ def qr_to_text_view(request):
             dt = decode_qrcode(data)
             return redirect('result', dt, 'text')
     return render(request, 'qr_to_text_view.html')
+
+
+def video_qr_code(request):
+    x = camera()
+    print(type(x))
+    return redirect('result', x, 'text')
+
+
+def detection(cam):
+    try:
+        a = ''
+        detector = cv2.QRCodeDetector()
+        while True:
+            _, img = cam.read()
+            data, bbox, _ = detector.detectAndDecode(img)
+            if data:
+                a = data
+                cv2.imwrite("testfilename.jpg", img)
+                print(a)
+                cam.release
+                return a
+            else:
+                return "Something went wrong"
+    except:
+        return HttpResponse("Failed to open camera")
+
+
+def camera():
+    qr_text = 'Failed to open camera'
+    for i in range(-5, 5):
+        cam = cv2.VideoCapture(i)
+        if cam is None or not cam.isOpened():
+            if i == 5:
+                return "Failed to open camera"
+        else:
+            qr_text = detection(cam)
+            if qr_text:
+                x = str(qr_text).split('/')
+                if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
+                    return webbrowser.open(qr_text)
+                else:
+                    qr_text.replace('', '#')
+                    return redirect('result', qr_text, 'text')
+    return qr_text
 
 
 def result(request, data, form):
