@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import qrcode
 from django.http import HttpResponse
 from datetime import datetime
@@ -6,6 +6,7 @@ import cv2
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from django.conf import settings
+from .forms import *
 
 
 # Create your views here.
@@ -17,13 +18,16 @@ def create_qrcode(data):
     qr.add_data(data)
     img = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
     img.save(filename)
-    return filename
+    return str(timestamp) + '.png'
 
 
 def decode_qrcode(dirs):
+    print(dirs)
+    dirs = 'media/qr_up_images/' + dirs
     image = cv2.imread(dirs)
     detector = cv2.QRCodeDetector()
     data, vertices_array, binary_qrcode = detector.detectAndDecode(image)
+    print('ok')
     if vertices_array is not None:
         return data
     else:
@@ -34,6 +38,27 @@ def home(request):
     if request.method == 'POST':
         text = request.POST.get('text')
         dirs = create_qrcode(text)
-        dt = decode_qrcode(dirs)
-        return render(request, 'index.html', {'dirs': dirs})
+        return redirect('result', dirs, 'img')
     return render(request, 'index.html', {'dirs': ''})
+
+
+def qr_to_text_view(request):
+    if request.method == 'POST':
+        form = ImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            data = QrCodeModel.objects.last()
+            data = str(data.image.url).split('/')[-1]
+            dt = decode_qrcode(data)
+            return redirect('result', dt, 'text')
+    return render(request, 'qr_to_text_view.html')
+
+
+def result(request, data, form):
+    if form == 'img':
+        data = '/media/qr_images/' + data
+    context = {
+        'data': data,
+        'format': form
+    }
+    return render(request, 'result.html', context)
