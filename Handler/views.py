@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect
 import qrcode
-from django.http import HttpResponse
 from datetime import datetime
 import cv2
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
-from django.conf import settings
 from .forms import *
+import webbrowser
 
 
 # Create your views here.
@@ -22,14 +21,17 @@ def create_qrcode(data):
 
 
 def decode_qrcode(dirs):
-    print(dirs)
     dirs = 'media/qr_up_images/' + dirs
     image = cv2.imread(dirs)
     detector = cv2.QRCodeDetector()
     data, vertices_array, binary_qrcode = detector.detectAndDecode(image)
-    print('ok')
+
     if vertices_array is not None:
-        return data
+        x = data.split('/')
+        if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
+            return webbrowser.open(data)
+        else:
+            return data
     else:
         return "There was some error"
 
