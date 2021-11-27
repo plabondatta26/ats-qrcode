@@ -1,9 +1,11 @@
+from django.shortcuts import render
 import qrcode
 from django.http import HttpResponse
 from datetime import datetime
 import cv2
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+from django.conf import settings
 
 
 # Create your views here.
@@ -29,7 +31,9 @@ def decode_qrcode(dirs):
 
 
 def home(request):
-    text = 'The install worked successfully! Congratulations!'
-    dirs = create_qrcode(text)
-    dt = decode_qrcode(dirs)
-    return HttpResponse(dt)
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        dirs = create_qrcode(text)
+        dt = decode_qrcode(dirs)
+        return render(request, 'index.html', {'dirs': dirs})
+    return render(request, 'index.html', {'dirs': ''})
