@@ -48,6 +48,17 @@
             </div>
 
         </div>
+
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                {% for key, values in data.items %}
+                <h3><b>{{key}}:</b> {{values}}
+
+
+                </h3>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
 

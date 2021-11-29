@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect
-import qrcode
 from datetime import datetime
 import cv2
-from qrcode.image.styledpil import StyledPilImage
-from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from .forms import *
 import webbrowser
-from django.http import HttpResponse
 import ast
 from segno import helpers
+from PIL import Image
+from pyzbar.pyzbar import decode
+import codecs
+import ast
+import vobject
 
 
 def create_qrcode(data):
@@ -27,20 +28,37 @@ def create_qrcode(data):
 
 
 def decode_qrcode(dirs):
+    # try:
+    return_data = {}
     dirs = 'media/qr_up_images/' + dirs
-    image = cv2.imread(dirs)
-    detector = cv2.QRCodeDetector()
-    data, bbox, _ = detector.detectAndDecode(image)
-    print(data)
-    print(bbox)
-    if data:
-        x = data.split('/')
-        if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
-            return webbrowser.open(data)
+    data = decode(Image.open(dirs))
+    vcard_data = ''
+    for i in data[0]:
+        vcard_data: str = codecs.decode(i, 'UTF-8')
+        break
+    vcard = vobject.readOne(vcard_data)
+    return_data["Name"] = vcard.contents['fn'][0].value
+    telephone = {}
+    for tel in vcard.contents['tel']:
+        i = dict((key, getattr(tel, key)) for key in dir(tel) if key not in dir(tel.__class__))
+        if len(i["params"]) > 0:
+            for j, k in i["params"].items():
+                print(k[0])
+                if k[0] == "FAX" and i["value"]:
+                    return_data["FAX"] = i["value"]
+                elif k[0] == "VIDEO" and i["value"]:
+                    return_data["Video"] = i["value"]
         else:
-            return data
-    else:
-        return "There was some error"
+            return_data["Phone"] = i["value"]
+
+    return_data["Email"] = vcard.contents['email'][0].value
+    return_data["Birthday"] = vcard.contents['bday'][0].value
+    return_data["Nickname"] = vcard.contents['nickname'][0].value
+    return_data["Address"] = vcard.contents['adr'][0].value
+    return_data["Website"] = vcard.contents['url'][0].value
+    return return_data
+    # except:
+    #     return "There is some error"
 
 
 def home(request):
@@ -58,58 +76,59 @@ def qr_to_text_view(request):
             data = QrCodeModel.objects.last()
             data = str(data.image.url).split('/')[-1]
             dt = decode_qrcode(data)
-            return redirect('result', dt, 'text')
-    return render(request, 'qr_to_text_view.html')
+            return render(request, 'qr_to_text_view.html', {'data': dt})
+    return render(request, 'qr_to_text_view.html', {'data': ''})
 
 
-def video_qr_code(request):
-    x = camera()
-    print(type(x))
-    # return redirect('result', x, 'text')
-    return HttpResponse(x)
-
-
-def detection(cam):
-    try:
-        a = ''
-        detector = cv2.QRCodeDetector()
-        while True:
-            _, img = cam.read()
-            # print(_, img)
-            cv2.imshow('frame', img)
-            cv2.waitKey(1000)
-            cv2.destroyAllWindows()
-            data, bbox, _ = detector.detectAndDecode(img)
-            if data:
-                a = data
-                cv2.imwrite("testfilename.jpg", img)
-                print(a)
-                cam.release
-                return a
-            else:
-                pass
-                # return "Error"
-    except:
-        return 'Failed to open camera'
-
-
-def camera():
-    qr_text = 'Failed to open camera'
-    for i in range(-5, 5):
-        cam = cv2.VideoCapture(i)
-        if cam is None or not cam.isOpened():
-            if i == 5:
-                return "Failed to open camera"
-        else:
-            qr_text = detection(cam)
-            if qr_text:
-                x = str(qr_text).split('/')
-                if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
-                    return webbrowser.open(qr_text)
-                else:
-                    # return redirect('result', qr_text, 'text')
-                    return HttpResponse(qr_text)
-    return qr_text
+#
+# def video_qr_code(request):
+#     x = camera()
+#     print(type(x))
+#     # return redirect('result', x, 'text')
+#     return HttpResponse(x)
+#
+#
+# def detection(cam):
+#     try:
+#         a = ''
+#         detector = cv2.QRCodeDetector()
+#         while True:
+#             _, img = cam.read()
+#             # print(_, img)
+#             cv2.imshow('frame', img)
+#             cv2.waitKey(1000)
+#             cv2.destroyAllWindows()
+#             data, bbox, _ = detector.detectAndDecode(img)
+#             if data:
+#                 a = data
+#                 cv2.imwrite("testfilename.jpg", img)
+#                 print(a)
+#                 cam.release
+#                 return a
+#             else:
+#                 pass
+#                 # return "Error"
+#     except:
+#         return 'Failed to open camera'
+#
+#
+# def camera():
+#     qr_text = 'Failed to open camera'
+#     for i in range(-5, 5):
+#         cam = cv2.VideoCapture(i)
+#         if cam is None or not cam.isOpened():
+#             if i == 5:
+#                 return "Failed to open camera"
+#         else:
+#             qr_text = detection(cam)
+#             if qr_text:
+#                 x = str(qr_text).split('/')
+#                 if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
+#                     return webbrowser.open(qr_text)
+#                 else:
+#                     # return redirect('result', qr_text, 'text')
+#                     return HttpResponse(qr_text)
+#     return qr_text
 
 
 def result(request, data, form):
@@ -125,7 +144,3 @@ def result(request, data, form):
         'dict_data': dict_data
     }
     return render(request, 'result.html', context)
-
-
-def test(request):
-    return render(request, 'test.html')
