@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect
 import qrcode
 from datetime import datetime
-# import cv2
+import cv2
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from .forms import *
 import webbrowser
 from django.http import HttpResponse
-import json
 import ast
 
 
@@ -23,48 +22,40 @@ def create_qrcode(data):
 
 def decode_qrcode(dirs):
     dirs = 'media/qr_up_images/' + dirs
-    # image = cv2.imread(dirs)
-    # detector = cv2.QRCodeDetector()
-    # data, bbox, _ = detector.detectAndDecode(image)
-    # print(data)
-    # print(bbox)
-    # if data:
-    #     x = data.split('/')
-    #     if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
-    #         return webbrowser.open(data)
-    #     else:
-    #         return data
-    # else:
-    return "There was some error"
+    image = cv2.imread(dirs)
+    detector = cv2.QRCodeDetector()
+    data, bbox, _ = detector.detectAndDecode(image)
+    print(data)
+    print(bbox)
+    if data:
+        x = data.split('/')
+        if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
+            return webbrowser.open(data)
+        else:
+            return data
+    else:
+        return "There was some error"
 
 
 def home(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        address = request.POST.get('address')
-        wt = request.POST.get('wt')
-        fb = request.POST.get('fb')
-        twitter = request.POST.get('twitter')
-        ln = request.POST.get('ln')
-        data = {
-            'BEGIN': 'VCARD',
-            'FN': name,
-            'TEL': phone,
-            'EMAIL; TYPE': 'INTERNET:johndoe @ gmail.com',
-            'END': 'VCARD'
-        }
-        # data = {
-        #     'name': name,
-        #     'email': email,
-        #     'phone': phone,
-        #     'address': address,
-        #     'wt': wt,
-        #     'fb': fb,
-        #     'twitter': twitter,
-        #     'ln': ln
-        # }
+        # first_name = request.POST.get('first_name')
+        # mid_name = request.POST.get('mid_name')
+        # last_name = request.POST.get('last_name')
+        # suffix = request.POST.get('suffix')
+        # pln = request.POST.get('pln')
+        # pmn = request.POST.get('pmn')
+        # pfn = request.POST.get('pfn')
+        # job_tt = request.POST.get('job_tt')
+        # address = request.POST.get('address')
+        # wt = request.POST.get('wt')
+        # fb = request.POST.get('fb')
+        # twitter = request.POST.get('twitter')
+        # ln = request.POST.get('ln')
+        data = {}
+        for k, v in request.POST.items():
+            if not k == "csrfmiddlewaretoken":
+                data[k] = v
         dirs = create_qrcode(data)
         return redirect('result', dirs, 'img')
     return render(request, 'index.html', {'dirs': ''})
@@ -133,6 +124,7 @@ def camera():
 
 
 def result(request, data, form):
+    dict_data=''
     if form == 'img':
         data = '/media/qr_images/' + data
     else:
