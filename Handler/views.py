@@ -58,7 +58,8 @@ def qr_to_text_view(request):
 def video_qr_code(request):
     x = camera()
     print(type(x))
-    return redirect('result', x, 'text')
+    # return redirect('result', x, 'text')
+    return HttpResponse(x)
 
 
 def detection(cam):
@@ -67,6 +68,10 @@ def detection(cam):
         detector = cv2.QRCodeDetector()
         while True:
             _, img = cam.read()
+            # print(_, img)
+            # cv2.imshow('frame', img)
+            # cv2.waitKey(1000)
+            cv2.destroyAllWindows()
             data, bbox, _ = detector.detectAndDecode(img)
             if data:
                 a = data
@@ -75,9 +80,10 @@ def detection(cam):
                 cam.release
                 return a
             else:
-                return "Something went wrong"
+                pass
+                # return "Error"
     except:
-        return HttpResponse("Failed to open camera")
+        return 'Failed to open camera'
 
 
 def camera():
@@ -94,8 +100,8 @@ def camera():
                 if x[0] == 'http:' or x[0] == 'https:' or x[0] == 'www':
                     return webbrowser.open(qr_text)
                 else:
-                    qr_text.replace('', '#')
-                    return redirect('result', qr_text, 'text')
+                    # return redirect('result', qr_text, 'text')
+                    return HttpResponse(qr_text)
     return qr_text
 
 
