@@ -8,15 +8,21 @@ from .forms import *
 import webbrowser
 from django.http import HttpResponse
 import ast
+from segno import helpers
 
 
 def create_qrcode(data):
     timestamp = round(datetime.now().timestamp())
     filename = 'media/qr_images/' + str(timestamp) + '.png'
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
-    qr.add_data(data)
-    img = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer())
-    img.save(filename)
+    qrcode = helpers.make_vcard(
+        name=data['name'], displayname=data['name'], email=data['email'],
+        phone=data['phone'], fax=data['fax'], videophone=data['videophone'], memo=data['memo'],
+        nickname=data['nickname'], birthday=data['birthday'], url=data['url'],
+        pobox=data['pobox'], street=data['street'], city=data['city'], region=data['region'],
+        zipcode=data['zipcode'], country=data['country'], org=data['org'], lat=data['lat'], lng=data['lng'],
+        title=data['title'], photo_uri=data['photo_uri']
+    )
+    qrcode.save(filename, scale=4)
     return str(timestamp) + '.png'
 
 
@@ -39,24 +45,7 @@ def decode_qrcode(dirs):
 
 def home(request):
     if request.method == 'POST':
-        # first_name = request.POST.get('first_name')
-        # mid_name = request.POST.get('mid_name')
-        # last_name = request.POST.get('last_name')
-        # suffix = request.POST.get('suffix')
-        # pln = request.POST.get('pln')
-        # pmn = request.POST.get('pmn')
-        # pfn = request.POST.get('pfn')
-        # job_tt = request.POST.get('job_tt')
-        # address = request.POST.get('address')
-        # wt = request.POST.get('wt')
-        # fb = request.POST.get('fb')
-        # twitter = request.POST.get('twitter')
-        # ln = request.POST.get('ln')
-        data = {}
-        for k, v in request.POST.items():
-            if not k == "csrfmiddlewaretoken":
-                data[k] = v
-        dirs = create_qrcode(data)
+        dirs = create_qrcode(request.POST)
         return redirect('result', dirs, 'img')
     return render(request, 'index.html', {'dirs': ''})
 
@@ -81,27 +70,27 @@ def video_qr_code(request):
 
 
 def detection(cam):
-    # try:
-    #     a = ''
-    #     detector = cv2.QRCodeDetector()
-    #     while True:
-    #         _, img = cam.read()
-    #         # print(_, img)
-    #         cv2.imshow('frame', img)
-    #         cv2.waitKey(1000)
-    #         cv2.destroyAllWindows()
-    #         data, bbox, _ = detector.detectAndDecode(img)
-    #         if data:
-    #             a = data
-    #             cv2.imwrite("testfilename.jpg", img)
-    #             print(a)
-    #             cam.release
-    #             return a
-    #         else:
-    #             pass
-    #             # return "Error"
-    # except:
-    return 'Failed to open camera'
+    try:
+        a = ''
+        detector = cv2.QRCodeDetector()
+        while True:
+            _, img = cam.read()
+            # print(_, img)
+            cv2.imshow('frame', img)
+            cv2.waitKey(1000)
+            cv2.destroyAllWindows()
+            data, bbox, _ = detector.detectAndDecode(img)
+            if data:
+                a = data
+                cv2.imwrite("testfilename.jpg", img)
+                print(a)
+                cam.release
+                return a
+            else:
+                pass
+                # return "Error"
+    except:
+        return 'Failed to open camera'
 
 
 def camera():
@@ -124,7 +113,7 @@ def camera():
 
 
 def result(request, data, form):
-    dict_data=''
+    dict_data = ''
     if form == 'img':
         data = '/media/qr_images/' + data
     else:
@@ -136,7 +125,6 @@ def result(request, data, form):
         'dict_data': dict_data
     }
     return render(request, 'result.html', context)
-
 
 
 def test(request):
