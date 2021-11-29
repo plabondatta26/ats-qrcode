@@ -36,10 +36,21 @@
             <div class="text-center">
                 <h2>QR Code Genarator</h2>
             </div>
-            <div class="col-12 text-center">
-                {% if format == 'text' %} {% for key, values in dict_data.items %}
-                <h3><b>{{key}}:</b> {{values}}</h3>
-                {% endfor %} {% else %} {% if data %}
+            <div class="col-4"></div>
+            <div class="col-6 text-center mt-3">
+
+                {% if format == 'text' %}
+                <table>
+                    <tbody>
+                        {% for key, values in dict_data.items %}
+                        <tr>
+                            <td>{{key}}</td>
+                            <td>{{values}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %} {% if data %}
                 <div class="text-center">
                     <img src="{{data}}" alt="test" id="qr_image"><br>
                     <a class="btn btn-warning" href="{{data}}" download>Download</a> {% endif %}
