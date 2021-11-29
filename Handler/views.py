@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 import qrcode
 from datetime import datetime
-import cv2
+# import cv2
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from .forms import *
@@ -144,3 +144,8 @@ def result(request, data, form):
         'dict_data': dict_data
     }
     return render(request, 'result.html', context)
+
+
+
+def test(request):
+    return render(request, 'test.html')
