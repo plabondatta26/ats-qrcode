@@ -37,9 +37,9 @@
                 <h2>QR Code Genarator</h2>
             </div>
             <div class="col-12 text-center">
-                {% if format == 'text' %}
-                <h3>{{data}}</h3>
-                {% else %} {% if data %}
+                {% if format == 'text' %} {% for key, values in dict_data.items %}
+                <h3><b>{{key}}:</b> {{values}}</h3>
+                {% endfor %} {% else %} {% if data %}
                 <div class="text-center">
                     <img src="{{data}}" alt="test" id="qr_image"><br>
                     <a class="btn btn-warning" href="{{data}}" download>Download</a> {% endif %}
