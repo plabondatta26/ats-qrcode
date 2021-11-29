@@ -1,9 +1,6 @@
 from django.shortcuts import render, redirect
 from datetime import datetime
-import cv2
 from .forms import *
-import webbrowser
-import ast
 from segno import helpers
 from PIL import Image
 from pyzbar.pyzbar import decode
@@ -34,7 +31,7 @@ def decode_qrcode(dirs):
         dirs = 'media/qr_up_images/' + dirs
         data = decode(Image.open(dirs))
         key_list = {'Name': 'Name', 'Phone': 'Phone', 'FAX': 'FAX', 'org': 'Company', 'email': 'Email',
-                    'nickname': 'Nickname', 'adr': 'Address'}
+                    'nickname': 'Nickname', 'adr': 'Address', 'bday': 'Birthday', 'url':'Website'}
         vcard_data = ''
         for i in data[0]:
             vcard_data: str = codecs.decode(i, 'UTF-8')
@@ -54,7 +51,6 @@ def decode_qrcode(dirs):
             else:
                 return_data["Phone"] = i["value"]
         for keys in vcard.contents:
-            print(vcard.contents[keys][0].value, '*****', )
             if vcard.contents[keys][0].value and keys == key_list[keys]:
                 return_data[key_list[keys]] = vcard.contents[keys][0].value
         # if vcard.contents['bday'][0].value:

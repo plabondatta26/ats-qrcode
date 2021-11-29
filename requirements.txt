@@ -2,9 +2,12 @@ asgiref==3.4.1
 colorama==0.4.4
 Django==3.2.9
 numpy==1.21.4
-opencv-python==4.5.4.60
 Pillow==8.4.0
+python-dateutil==2.8.2
 pytz==2021.3
+pyzbar==0.1.8
 segno==1.4.1
+six==1.16.0
 sqlparse==0.4.2
 typing_extensions==4.0.0
+vobject==0.9.6.1
