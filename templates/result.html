@@ -41,10 +41,10 @@
 
                 {% if format == 'text' %}
                 <table>
-                    <tbody>
+                    <tbody style="text-align: left; justify-content: left; padding: 5px;">
                         {% for key, values in dict_data.items %}
                         <tr>
-                            <td>{{key}}</td>
+                            <td style="margin-right: 5px;"><b>{{key}}:</b></td>
                             <td>{{values}}</td>
                         </tr>
                         {% endfor %}
