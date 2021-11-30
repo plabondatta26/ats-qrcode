@@ -26,46 +26,46 @@ def create_qrcode(data):
 
 def decode_qrcode(dirs):
     return_data = {}
-    # try:
-    dirs = 'media/qr_up_images/' + dirs
-    data = decode(Image.open(dirs))
-    key_list = {'Name': 'Name', 'Phone': 'Phone', 'FAX': 'FAX', 'org': 'Company', 'email': 'Email',
-                'nickname': 'Nickname', 'adr': 'Address', 'bday': 'Birthday', 'url': 'Website'}
-    vcard_data = ''
-    for i in data[0]:
-        vcard_data: str = codecs.decode(i, 'UTF-8')
-        break
-    vcard = vobject.readOne(vcard_data)
-    return_data["Name"] = vcard.contents['fn'][0].value
-    for keys in vcard.contents:
-        x = key_list.get(keys, None)
-        if vcard.contents[keys][0].value and x:
-            return_data[key_list[keys]] = str(vcard.contents[keys][0].value)
-        else:
-            pass
-
-    for tel in vcard.contents['tel']:
-        i = dict((key, getattr(tel, key)) for key in dir(tel) if key not in dir(tel.__class__))
-        if len(i["params"]) > 0:
-            for j, k in i["params"].items():
-                if k[0] == "FAX" and i["value"]:
-                    return_data["FAX"] = i["value"]
-                elif k[0] == "VIDEO" and i["value"]:
-                    return_data["Video"] = i["value"]
-        else:
-            return_data["Phone"] = i["value"]
-    company_list = ''
-    count = 0
-    for i in range(0, len(vcard.contents['org'])):
-        for j in vcard.contents['org'][i].value:
-            if count == 0:
-                company_list += j
+    try:
+        dirs = 'media/qr_up_images/' + dirs
+        data = decode(Image.open(dirs))
+        key_list = {'Name': 'Name', 'Phone': 'Phone', 'FAX': 'FAX', 'org': 'Company', 'email': 'Email',
+                    'nickname': 'Nickname', 'adr': 'Address', 'bday': 'Birthday', 'url': 'Website'}
+        vcard_data = ''
+        for i in data[0]:
+            vcard_data: str = codecs.decode(i, 'UTF-8')
+            break
+        vcard = vobject.readOne(vcard_data)
+        return_data["Name"] = vcard.contents['fn'][0].value
+        for keys in vcard.contents:
+            x = key_list.get(keys, None)
+            if vcard.contents[keys][0].value and x:
+                return_data[key_list[keys]] = str(vcard.contents[keys][0].value)
             else:
-                company_list += ',' + j
-    return_data["Company"] = company_list
-    return return_data
-    # except KeyError as ke:
-    #     return return_data
+                pass
+
+        for tel in vcard.contents['tel']:
+            i = dict((key, getattr(tel, key)) for key in dir(tel) if key not in dir(tel.__class__))
+            if len(i["params"]) > 0:
+                for j, k in i["params"].items():
+                    if k[0] == "FAX" and i["value"]:
+                        return_data["FAX"] = i["value"]
+                    elif k[0] == "VIDEO" and i["value"]:
+                        return_data["Video"] = i["value"]
+            else:
+                return_data["Phone"] = i["value"]
+        company_list = ''
+        count = 0
+        for i in range(0, len(vcard.contents['org'])):
+            for j in vcard.contents['org'][i].value:
+                if count == 0:
+                    company_list += j
+                else:
+                    company_list += ',' + j
+        return_data["Company"] = company_list
+        return return_data
+    except KeyError as ke:
+        return return_data
 
 
 def home(request):
