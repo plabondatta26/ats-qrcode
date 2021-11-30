@@ -71,7 +71,7 @@ def decode_qrcode(dirs):
 def home(request):
     if request.method == 'POST':
         dirs = create_qrcode(request.POST)
-        return redirect('result', dirs, 'img')
+        return redirect('result_url', dirs, 'img')
     return render(request, 'index.html', {'dirs': ''})
 
 
@@ -83,7 +83,12 @@ def qr_to_text_view(request):
             data = QrCodeModel.objects.last()
             data = str(data.image.url).split('/')[-1]
             dt = decode_qrcode(data)
-            return redirect('result', dt, 'text')
+            context = {
+                'data': data,
+                'format': 'text',
+                'dict_data': dt
+            }
+            return render(request, 'result.html', context)
             # return render(request, 'qr_to_text_view.html', {'data': dt})
     return render(request, 'qr_to_text_view.html', {'data': ''})
 
