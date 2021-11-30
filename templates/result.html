@@ -45,7 +45,13 @@
                         {% for key, values in dict_data.items %}
                         <tr>
                             <td style="margin-right: 5px;"><b>{{key}}:</b></td>
-                            <td>{{values}}</td>
+                            <td>
+                                {% if key == 'Email' %}
+                                <a href="mailto:{{values}}">{{values}}</a> {% elif key == 'Website'%}
+                                <a href="{{values}}">{{values}}</a> {% elif key == 'Phone'%}
+                                <a href="TEL:{{values}}">{{values}}</a> {% else %} {{values}} {% endif %}
+
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

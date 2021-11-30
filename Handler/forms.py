@@ -7,9 +7,7 @@ class ImageForm(forms.ModelForm):
         model = QrCodeModel
         fields = '__all__'
 
-
-
-# version
+#
 # n
 # fn
 # org
@@ -20,13 +18,10 @@ class ImageForm(forms.ModelForm):
 # photo
 # nickname
 # adr
+# bday
+# geo
+# note
 
-
-
-
-
-
-#
 # def decode_qrcode(dirs):
 #     return_data = {}
 #     try:

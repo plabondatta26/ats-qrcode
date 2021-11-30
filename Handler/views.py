@@ -30,7 +30,8 @@ def decode_qrcode(dirs):
         dirs = 'media/qr_up_images/' + dirs
         data = decode(Image.open(dirs))
         key_list = {'Name': 'Name', 'Phone': 'Phone', 'FAX': 'FAX', 'org': 'Company', 'email': 'Email',
-                    'nickname': 'Nickname', 'adr': 'Address', 'bday': 'Birthday', 'url': 'Website'}
+                    'nickname': 'Nickname', 'adr': 'Address', 'bday': 'Birthday', 'url': 'Website',
+                    'memo': 'Facebook', }
         vcard_data = ''
         for i in data[0]:
             vcard_data: str = codecs.decode(i, 'UTF-8')
